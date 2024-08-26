@@ -5,9 +5,13 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import com.projects.usandofirebase.entity.Cadastro
 
 class DatabaseHandler(context: Context): SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION){
+
+    val banco = Firebase.firestore
 
     override fun onCreate(db: SQLiteDatabase?) {
         db?.execSQL("CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (_id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, telefone TEXT )")
@@ -28,27 +32,47 @@ class DatabaseHandler(context: Context): SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     fun insert(cadastro : Cadastro){
-        val db = this.writableDatabase
+        val registro = hashMapOf(
+            "_id" to cadastro._id,
+            "nome" to cadastro.nome,
+            "telefone" to cadastro.telefone
+        )
+        banco.collection("cadastro")
+            .document(cadastro._id.toString())
+            .set(registro)
+            .addOnFailureListener {
+                println("Sucesso")
+            }.addOnFailureListener { e->
+                println("Erro: ${e.message}")
+            }
 
-        val registro = ContentValues()
-        registro.put("nome", cadastro.nome)
-        registro.put("telefone", cadastro.telefone)
-
-        db.insert(TABLE_NAME, null, registro)
+        //db.insert(TABLE_NAME, null, registro)
     }
     fun update(cadastro : Cadastro){
-        val db = this.writableDatabase
-
-        val registro = ContentValues()
-        registro.put("nome", cadastro.nome)
-        registro.put("telefone", cadastro.telefone)
-
-        db.update(TABLE_NAME, registro,"_id=${cadastro._id}", null)
+        val registro = hashMapOf(
+            "_id" to cadastro._id,
+            "nome" to cadastro.nome,
+            "telefone" to cadastro.telefone
+        )
+        banco.collection("cadastro")
+            .document(cadastro._id.toString())
+            .set(registro)
+            .addOnFailureListener {
+                println("Sucesso")
+            }.addOnFailureListener { e->
+                println("Erro: ${e.message}")
+            }
     }
     fun delete(id : Int){
-        val db = this.writableDatabase
-
-        db.delete(TABLE_NAME, "_id=${id}", null)
+        banco.collection("cadastro")
+            .document(id.toString())
+            .delete()
+            .addOnSuccessListener {
+                println("Sucesso")
+            }
+            .addOnFailureListener { e->
+                println("Erro: ${e.message}")
+            }
     }
     fun find(id : Int ) : Cadastro?{
         val db = this.writableDatabase
