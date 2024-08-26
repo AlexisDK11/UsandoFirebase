@@ -99,27 +99,24 @@ class DatabaseHandler(context: Context): SQLiteOpenHelper(context, DATABASE_NAME
         }
     }
     fun list() : MutableList<Cadastro>{
-        val db = this.writableDatabase
-        val registro = db.query(
-            TABLE_NAME,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
 
         var registros = mutableListOf<Cadastro>()
 
-        while (registro.moveToNext()){
-            val cadastro = Cadastro(
-                registro.getInt(COD),
-                registro.getString(NOME),
-                registro.getString(TELEFONE)
-            )
-            registros.add(cadastro)
-        }
+        banco.collection("cadastro")
+            .get()
+            .addOnSuccessListener {result ->
+                for(document in result){
+                    val cadastro = Cadastro(
+                        document.data.get("_id").toString().toInt(),
+                        document.data.get("nome").toString(),
+                        document.data.get("telefone").toString()
+                    )
+                }
+                println("Sucesso")
+            }.addOnFailureListener { e->
+                println("Erro: ${e.message}")
+            }
+
         return registros
     }
     fun cursorList() : Cursor {

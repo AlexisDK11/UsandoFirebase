@@ -13,25 +13,21 @@ import com.projects.usandofirebase.R
 import com.projects.usandofirebase.entity.Cadastro
 
 
-class MeuAdapter(val context : Context, val cursor : Cursor) : BaseAdapter() {
+class MeuAdapter(val context : Context, val registros : MutableList<Cadastro>) : BaseAdapter() {
 
     override fun getCount(): Int {
-        return cursor.count
+        return registros.size
     }
 
     override fun getItem(position: Int): Any {
-        cursor.moveToPosition(position)
-        val cadastro = Cadastro(
-            cursor.getInt(0),
-            cursor.getString(1),
-            cursor.getString(2)
-        )
+
+        val cadastro = registros.get( position )
         return cadastro
     }
 
     override fun getItemId(position: Int): Long {
-        cursor.moveToPosition(position)
-        return cursor.getLong(0)
+        val cadastro = registros.get( position )
+        return cadastro._id.toLong()
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
@@ -42,20 +38,21 @@ class MeuAdapter(val context : Context, val cursor : Cursor) : BaseAdapter() {
         val tvTelefoneElementoLista = v.findViewById<TextView>( R.id.tvTelefoneElementoLista )
         val btEditarElementoLista = v.findViewById<ImageButton>( R.id.btEditarElementoLista )
 
-        cursor.moveToPosition(position)
+        val cadastro = registros.get( position )
 
-        tvNomeElementoLista.setText( cursor.getString(1) )
-        tvTelefoneElementoLista.setText( cursor.getString(2) )
+        tvNomeElementoLista.setText( cadastro.nome )
+        tvTelefoneElementoLista.setText( cadastro.telefone )
 
         btEditarElementoLista.setOnClickListener{
-            cursor.moveToPosition(position)
-            val intent = Intent(context, MainActivity::class.java)
+            val cadastro = registros.get( position )
 
-            intent.putExtra("cod", cursor.getInt(0))
-            intent.putExtra("nome", cursor.getInt(1))
-            intent.putExtra("telefone", cursor.getInt(2))
+            val intent = Intent( context, MainActivity::class.java)
 
-            context.startActivity(intent)
+            intent.putExtra( "cod", cadastro._id )
+            intent.putExtra( "nome", cadastro.nome )
+            intent.putExtra( "telefone", cadastro.telefone )
+
+            context.startActivity( intent )
         }
 
         return v

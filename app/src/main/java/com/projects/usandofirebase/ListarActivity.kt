@@ -3,9 +3,12 @@ package com.projects.usandofirebase
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import com.projects.usandofirebase.adapter.MeuAdapter
 import com.projects.usandofirebase.database.DatabaseHandler
 import com.projects.usandofirebase.databinding.ActivityListarBinding
+import com.projects.usandofirebase.entity.Cadastro
 
 class ListarActivity : AppCompatActivity() {
 
@@ -32,9 +35,28 @@ class ListarActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        val registros = banco.cursorList()
 
-        val adapter = MeuAdapter(this, registros)
-        binding.lvPrincipal.adapter = adapter
+        val banco = Firebase.firestore
+
+        banco.collection("cadastro")
+            .get()
+            .addOnSuccessListener {result ->
+                var registros = mutableListOf<Cadastro>()
+                for(document in result){
+                    val cadastro = Cadastro(
+                        document.data.get("_id").toString().toInt(),
+                        document.data.get("nome").toString(),
+                        document.data.get("telefone").toString()
+                    )
+                }
+
+                val adapter = MeuAdapter(this, registros)
+                binding.lvPrincipal.adapter = adapter
+                println("Sucesso")
+            }.addOnFailureListener { e->
+                println("Erro: ${e.message}")
+            }
+
+
     }
 }
